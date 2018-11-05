@@ -44,14 +44,8 @@ import net.runelite.data.dump.MediaWikiTemplate;
 public class ItemStatsDumper
 {
 	@EqualsAndHashCode
-	private static final class ItemStats
+	private static final class ItemEquipmentStats
 	{
-		static final ItemStats DEFAULT = new ItemStats();
-
-		boolean quest;
-		boolean equipable;
-		double weight;
-
 		int astab;
 		int aslash;
 		int acrush;
@@ -69,6 +63,18 @@ public class ItemStatsDumper
 		int mdmg;
 		int prayer;
 		int aspeed;
+	}
+
+	@EqualsAndHashCode
+	private static final class ItemStats
+	{
+		static final ItemStats DEFAULT = new ItemStats();
+
+		boolean quest;
+		boolean equipable;
+		double weight;
+
+		ItemEquipmentStats equipment;
 	}
 
 	public static void dump(final Store store, final MediaWiki wiki) throws IOException
@@ -121,27 +127,32 @@ public class ItemStatsDumper
 			itemStat.equipable = base.getBoolean("equipable");
 			itemStat.weight = base.getDouble("weight");
 
-			final MediaWikiTemplate stats = MediaWikiTemplate.parse("Infobox Bonuses", data);
-
-			if (stats != null)
+			if (itemStat.equipable)
 			{
-				itemStat.astab = stats.getInt("astab");
-				itemStat.aslash = stats.getInt("aslash");
-				itemStat.acrush = stats.getInt("acrush");
-				itemStat.amagic = stats.getInt("amagic");
-				itemStat.arange = stats.getInt("arange");
+				final MediaWikiTemplate stats = MediaWikiTemplate.parse("Infobox Bonuses", data);
 
-				itemStat.dstab = stats.getInt("dstab");
-				itemStat.dslash = stats.getInt("dslash");
-				itemStat.dcrush = stats.getInt("dcrush");
-				itemStat.dmagic = stats.getInt("dmagic");
-				itemStat.drange = stats.getInt("drange");
+				if (stats != null)
+				{
+					final ItemEquipmentStats equipmentStat = new ItemEquipmentStats();
+					equipmentStat.astab = stats.getInt("astab");
+					equipmentStat.aslash = stats.getInt("aslash");
+					equipmentStat.acrush = stats.getInt("acrush");
+					equipmentStat.amagic = stats.getInt("amagic");
+					equipmentStat.arange = stats.getInt("arange");
 
-				itemStat.str = stats.getInt("str");
-				itemStat.rstr = stats.getInt("rstr");
-				itemStat.mdmg = stats.getInt("mdmg");
-				itemStat.prayer = stats.getInt("prayer");
-				itemStat.aspeed = stats.getInt("aspeed");
+					equipmentStat.dstab = stats.getInt("dstab");
+					equipmentStat.dslash = stats.getInt("dslash");
+					equipmentStat.dcrush = stats.getInt("dcrush");
+					equipmentStat.dmagic = stats.getInt("dmagic");
+					equipmentStat.drange = stats.getInt("drange");
+
+					equipmentStat.str = stats.getInt("str");
+					equipmentStat.rstr = stats.getInt("rstr");
+					equipmentStat.mdmg = stats.getInt("mdmg");
+					equipmentStat.prayer = stats.getInt("prayer");
+					equipmentStat.aspeed = stats.getInt("aspeed");
+					itemStat.equipment = equipmentStat;
+				}
 			}
 
 			itemStats.put(name, itemStat);
