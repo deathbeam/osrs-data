@@ -30,6 +30,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import lombok.EqualsAndHashCode;
+import lombok.extern.slf4j.Slf4j;
 import net.runelite.cache.ItemManager;
 import net.runelite.cache.definitions.ItemDefinition;
 import net.runelite.cache.fs.Store;
@@ -38,10 +40,14 @@ import net.runelite.data.App;
 import net.runelite.data.dump.MediaWiki;
 import net.runelite.data.dump.MediaWikiTemplate;
 
+@Slf4j
 public class ItemStatsDumper
 {
+	@EqualsAndHashCode
 	private static final class ItemStats
 	{
+		static final ItemStats DEFAULT = new ItemStats();
+
 		boolean quest;
 		boolean equipable;
 		double weight;
@@ -69,6 +75,8 @@ public class ItemStatsDumper
 	{
 		final File out = new File("runelite/runelite-client/src/main/resources/");
 		out.mkdirs();
+
+		log.info("Dumping item stats to {}", out);
 
 		ItemManager itemManager = new ItemManager(store);
 		itemManager.load();
@@ -99,8 +107,6 @@ public class ItemStatsDumper
 				continue;
 			}
 
-			System.out.println("Dumping item " + item.id + " " + name);
-
 			final ItemStats itemStat = new ItemStats();
 			final MediaWikiTemplate base = MediaWikiTemplate.parse("Infobox Item", data);
 
@@ -108,6 +114,8 @@ public class ItemStatsDumper
 			{
 				continue;
 			}
+
+			log.info("Dumping item {} {}", item.id, name);
 
 			itemStat.quest = base.getBoolean("quest");
 			itemStat.equipable = base.getBoolean("equipable");
@@ -138,6 +146,8 @@ public class ItemStatsDumper
 
 			itemStats.put(name, itemStat);
 		}
+
+		itemStats.values().removeIf(ItemStats.DEFAULT::equals);
 
 		try (FileWriter fw = new FileWriter(new File(out, "item_stats.json")))
 		{

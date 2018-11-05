@@ -31,18 +31,22 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import net.runelite.cache.ItemManager;
 import net.runelite.cache.definitions.ItemDefinition;
 import net.runelite.cache.fs.Store;
 import net.runelite.cache.util.Namer;
 import net.runelite.data.App;
 
+@Slf4j
 public class ItemVariationsDumper
 {
 	public static void dump(final Store store) throws IOException
 	{
 		final File out = new File("runelite/runelite-client/src/main/resources/");
 		out.mkdirs();
+
+		log.info("Dumping item variations to {}", out);
 
 		ItemManager itemManager = new ItemManager(store);
 		itemManager.load();
