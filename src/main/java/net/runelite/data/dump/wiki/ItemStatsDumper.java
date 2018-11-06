@@ -112,7 +112,6 @@ public class ItemStatsDumper
 				continue;
 			}
 
-			final ItemStats itemStat = new ItemStats();
 			final MediaWikiTemplate base = MediaWikiTemplate.parseWikitext("Infobox Item", data);
 
 			if (base == null)
@@ -122,6 +121,7 @@ public class ItemStatsDumper
 
 			log.info("Dumping item stat for {} {}", item.id, name);
 
+			final ItemStats itemStat = new ItemStats();
 			itemStat.quest = base.getBoolean("quest");
 			itemStat.equipable = base.getBoolean("equipable");
 			itemStat.weight = base.getDouble("weight");
