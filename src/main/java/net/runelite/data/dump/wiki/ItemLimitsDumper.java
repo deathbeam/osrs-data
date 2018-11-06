@@ -99,5 +99,7 @@ public class ItemLimitsDumper
 		{
 			fw.write(App.GSON.toJson(limits));
 		}
+
+		log.info("Dumped {} item limits", limits.size());
 	}
 }

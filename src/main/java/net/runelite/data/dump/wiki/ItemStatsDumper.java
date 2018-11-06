@@ -163,5 +163,7 @@ public class ItemStatsDumper
 		{
 			fw.write(App.GSON.toJson(itemStats));
 		}
+
+		log.info("Dumped {} item stats", itemStats.size());
 	}
 }

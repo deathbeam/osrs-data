@@ -87,5 +87,7 @@ public class ItemVariationsDumper
 		{
 			fw.write(App.GSON.toJson(map));
 		}
+
+		log.info("Dumped {} item variations", map.size());
 	}
 }
