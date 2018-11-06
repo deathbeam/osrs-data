@@ -51,7 +51,7 @@ public class ItemLimitsDumper
 		ItemManager itemManager = new ItemManager(store);
 		itemManager.load();
 
-		final Map<Integer, Integer> limits = new LinkedHashMap<>();
+		final Map<String, Integer> limits = new LinkedHashMap<>();
 
 		for (ItemDefinition item : itemManager.getItems())
 		{
@@ -65,7 +65,7 @@ public class ItemLimitsDumper
 				.replace('\u00A0', ' ')
 				.trim();
 
-			if (name.isEmpty() || limits.containsKey(item.id))
+			if (name.isEmpty() || limits.containsKey(name))
 			{
 				continue;
 			}
@@ -92,7 +92,7 @@ public class ItemLimitsDumper
 			}
 
 			log.info("Dumping item limit for {} {}", item.id, name);
-			limits.put(item.id, limit);
+			limits.put(name, limit);
 		}
 
 		try (FileWriter fw = new FileWriter(new File(out, "item_limits.json")))
