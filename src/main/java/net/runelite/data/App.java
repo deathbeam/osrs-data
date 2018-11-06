@@ -3,8 +3,7 @@
  *
  * Copyright (c) 2018 Tomas Slusny
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy*
- *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
@@ -31,11 +30,15 @@ import java.io.IOException;
 import net.runelite.cache.fs.Store;
 import net.runelite.data.dump.MediaWiki;
 import net.runelite.data.dump.cache.ItemVariationsDumper;
+import net.runelite.data.dump.wiki.ItemLimitsDumper;
 import net.runelite.data.dump.wiki.ItemStatsDumper;
 
 public class App
 {
-	public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+	public static final Gson GSON = new GsonBuilder()
+		.setPrettyPrinting()
+		.disableHtmlEscaping()
+		.create();
 
 	public static void main(String[] args) throws IOException
 	{
@@ -46,6 +49,7 @@ public class App
 		ItemVariationsDumper.dump(cacheStore);
 
 		final MediaWiki wiki = new MediaWiki("https://oldschool.runescape.wiki");
+		ItemLimitsDumper.dump(cacheStore, wiki);
 		ItemStatsDumper.dump(cacheStore, wiki);
 	}
 }

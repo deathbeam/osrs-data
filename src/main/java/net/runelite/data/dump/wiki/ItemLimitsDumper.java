@@ -21,14 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package net.runelite.data.dump.cache;
+package net.runelite.data.dump.wiki;
 
-import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.Multimap;
+import com.google.common.base.Strings;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.cache.ItemManager;
@@ -36,56 +35,69 @@ import net.runelite.cache.definitions.ItemDefinition;
 import net.runelite.cache.fs.Store;
 import net.runelite.cache.util.Namer;
 import net.runelite.data.App;
+import net.runelite.data.dump.MediaWiki;
+import net.runelite.data.dump.MediaWikiTemplate;
 
 @Slf4j
-public class ItemVariationsDumper
+public class ItemLimitsDumper
 {
-	public static void dump(final Store store) throws IOException
+	public static void dump(final Store store, final MediaWiki wiki) throws IOException
 	{
 		final File out = new File("runelite/runelite-client/src/main/resources/");
 		out.mkdirs();
 
-		log.info("Dumping item variations to {}", out);
+		log.info("Dumping item limits to {}", out);
 
 		ItemManager itemManager = new ItemManager(store);
 		itemManager.load();
 
-		final Multimap<String, Integer> mmap = LinkedListMultimap.create();
+		final Map<Integer, Integer> limits = new LinkedHashMap<>();
 
-		for (ItemDefinition def : itemManager.getItems())
+		for (ItemDefinition item : itemManager.getItems())
 		{
-			final String outName = Namer.removeTags(def.name).toLowerCase()
-				.replace("null", "")
-				.replaceAll("\\([^)]+\\)", "")
-				.replaceAll("[^a-zA-Z0-9 ]", "")
-				.replaceAll(" [0-9]+|[0-9]+ ", "")
-				.replaceAll("uncharged | uncharged", "")
-				.replaceAll("new | new", "")
-				.replaceAll(" full", "")
-				.replaceAll("half a ", "")
-				.replaceAll("part ", "")
-				.replace("  ", " ")
-				.replaceAll("\\w+ slayer helmet", "slayer helmet")
-				.replaceAll("\\w+ abyssal whip", "abyssal whip")
-				.replaceAll("magma helm|tanzanite helm", "serpentine helm")
-				.replace("trident of the seas", "trident")
-				.replace("trident of the swamp", "toxic trident")
-				.replace("toxic staff of the dead", "toxic staff")
-				.trim();
-
-			if (outName.isEmpty())
+			if (item.name.equalsIgnoreCase("NULL"))
 			{
 				continue;
 			}
 
-			mmap.put(outName, def.id);
+			final String name = Namer
+				.removeTags(item.name)
+				.replace('\u00A0', ' ')
+				.trim();
+
+			if (name.isEmpty() || limits.containsKey(item.id))
+			{
+				continue;
+			}
+
+			final String data = wiki.getPageData("Module:Exchange/" + name, -1);
+
+			if (Strings.isNullOrEmpty(data))
+			{
+				continue;
+			}
+
+			final MediaWikiTemplate geStats = MediaWikiTemplate.parseLua(data);
+
+			if (geStats == null)
+			{
+				continue;
+			}
+
+			final int limit = geStats.getInt("limit");
+
+			if (limit <= 0)
+			{
+				continue;
+			}
+
+			log.info("Dumping item limit for {} {}", item.id, name);
+			limits.put(item.id, limit);
 		}
 
-		final Map<String, Collection<Integer>> map = mmap.asMap();
-		map.entrySet().removeIf(entry -> entry.getValue().size() <= 1);
-		try (FileWriter fw = new FileWriter(new File(out, "item_variations.json")))
+		try (FileWriter fw = new FileWriter(new File(out, "item_limits.json")))
 		{
-			fw.write(App.GSON.toJson(map));
+			fw.write(App.GSON.toJson(limits));
 		}
 	}
 }

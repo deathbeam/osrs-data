@@ -3,8 +3,7 @@
  *
  * Copyright (c) 2018 Tomas Slusny
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy*
- *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
@@ -106,7 +105,7 @@ public class ItemStatsDumper
 				continue;
 			}
 
-			final String data = wiki.getPageData(name);
+			final String data = wiki.getPageData(name, 0);
 
 			if (Strings.isNullOrEmpty(data))
 			{
@@ -114,14 +113,14 @@ public class ItemStatsDumper
 			}
 
 			final ItemStats itemStat = new ItemStats();
-			final MediaWikiTemplate base = MediaWikiTemplate.parse("Infobox Item", data);
+			final MediaWikiTemplate base = MediaWikiTemplate.parseWikitext("Infobox Item", data);
 
 			if (base == null)
 			{
 				continue;
 			}
 
-			log.info("Dumping item {} {}", item.id, name);
+			log.info("Dumping item stat for {} {}", item.id, name);
 
 			itemStat.quest = base.getBoolean("quest");
 			itemStat.equipable = base.getBoolean("equipable");
@@ -129,7 +128,7 @@ public class ItemStatsDumper
 
 			if (itemStat.equipable)
 			{
-				final MediaWikiTemplate stats = MediaWikiTemplate.parse("Infobox Bonuses", data);
+				final MediaWikiTemplate stats = MediaWikiTemplate.parseWikitext("Infobox Bonuses", data);
 
 				if (stats != null)
 				{

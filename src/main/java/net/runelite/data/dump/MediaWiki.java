@@ -3,8 +3,7 @@
  *
  * Copyright (c) 2018 Tomas Slusny
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy*
- *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
@@ -54,14 +53,20 @@ public class MediaWiki
 		this.base = HttpUrl.parse(base).newBuilder().addPathSegment("api.php").build();
 	}
 
-	public String getPageData(final String page)
+	public String getPageData(final String page, int section)
 	{
-		final HttpUrl url = base.newBuilder()
+		final HttpUrl.Builder urlBuilder = base.newBuilder()
 			.addQueryParameter("action", "parse")
 			.addQueryParameter("format", "json")
 			.addQueryParameter("prop", "wikitext")
-			.addQueryParameter("page", page)
-			.build();
+			.addQueryParameter("page", page.replaceAll(" ", "_"));
+
+		if (section != -1)
+		{
+			urlBuilder.addQueryParameter("section", String.valueOf(section));
+		}
+
+		final HttpUrl url = urlBuilder.build();
 
         final Request request = new Request.Builder()
 			.url(url)
