@@ -20,7 +20,7 @@
 	<name>runelite-data</name>
 
 	<properties>
-		<latest>1.4.25-SNAPSHOT</latest>
+		<latest>1.4.26-SNAPSHOT</latest>
 	</properties>
 
 	<repositories>
@@ -44,6 +44,11 @@
 			<artifactId>cache</artifactId>
 			<version>${latest}</version>
 		</dependency>
+		<dependency>
+			<groupId>net.runelite</groupId>
+			<artifactId>runelite-api</artifactId>
+			<version>${latest}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -60,6 +65,18 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
 			<version>1.8.0-beta2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.petitparser</groupId>
+			<artifactId>petitparser-core</artifactId>
+			<version>2.2.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<version>RELEASE</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

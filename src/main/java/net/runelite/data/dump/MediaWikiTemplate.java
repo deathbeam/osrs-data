@@ -23,95 +23,112 @@
  */
 package net.runelite.data.dump;
 
+import com.google.common.base.Function;
 import com.google.common.base.Strings;
+import java.util.AbstractMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
+import org.petitparser.parser.Parser;
+import org.petitparser.parser.primitive.CharacterParser;
+import org.petitparser.parser.primitive.StringParser;
 
 public class MediaWikiTemplate
 {
+	private static final Parser LUA_PARSER;
+	private static final Parser MEDIAWIKI_PARSER;
+
+	static
+	{
+		final Parser singleString = CharacterParser.of('\'').seq(CharacterParser.of('\'').neg().plus().flatten()).seq(CharacterParser.of('\''));
+		final Parser doubleString = CharacterParser.of('"').seq(CharacterParser.of('"').neg().plus().flatten()).seq(CharacterParser.of('"'));
+		final Parser string = singleString.or(doubleString).pick(1);
+
+		final Parser key = CharacterParser.letter().or(CharacterParser.of('-')).or(CharacterParser.digit()).plus().flatten();
+		final Parser value = string.or(key);
+
+		final Parser pair = key.trim()
+			.seq(CharacterParser.of('=').trim())
+			.seq(value.trim())
+			.map((Function<List<String>, Map.Entry<String, String>>) input -> new AbstractMap.SimpleEntry<>(input.get(0).trim(), input.get(2).trim()));
+
+		final Parser commaLine = pair
+			.seq(CharacterParser.of(',').optional().trim())
+			.pick(0);
+
+		LUA_PARSER = StringParser.of("return").trim()
+			.seq(CharacterParser.of('{').trim())
+			.seq(commaLine.plus().trim())
+			.seq(CharacterParser.of('}'))
+			.pick(2);
+
+		final Parser notOrPair = key.trim()
+			.seq(CharacterParser.of('=').trim())
+			.seq(CharacterParser.of('|').or(StringParser.of("\n}}")).neg().plus().flatten().trim())
+			.map((Function<List<String>, Map.Entry<String, String>>) input -> new AbstractMap.SimpleEntry<>(input.get(0).trim(), input.get(2).trim()));
+
+		final Parser orLine = CharacterParser.of('|')
+			.seq(notOrPair.trim())
+			.pick(1);
+
+		MEDIAWIKI_PARSER = orLine.plus().trim().seq(StringParser.of("}}")).pick(0);
+	}
+
 	@Nullable
 	public static MediaWikiTemplate parseWikitext(final String name, final String data)
 	{
-		final String[] split = data.split("\n");
 		final Map<String, String> out = new HashMap<>();
+		final List<Object> parsed = StringParser.of("{{")
+			.seq(StringParser.of(name).trim())
+			.seq(MEDIAWIKI_PARSER)
+			.pick(2)
+			.matchesSkipping(data);
 
-		boolean hasStart = false;
-
-		for (String line : split)
+		if (parsed.isEmpty())
 		{
-			if (line.startsWith("{{" + name))
-			{
-				hasStart = true;
-				continue;
-			}
-
-			if (!hasStart)
-			{
-				continue;
-			}
-
-			if (line.endsWith("}}"))
-			{
-				return new MediaWikiTemplate(out);
-			}
-
-			if (line.startsWith("|"))
-			{
-				final String[] kv = line.substring(1).split("=");
-
-				if (kv.length != 2)
-				{
-					continue;
-				}
-
-				out.put(kv[0].trim(), kv[1].trim());
-			}
+			return null;
 		}
 
-		return null;
+		final List<Map.Entry<String, String>> entries = (List<Map.Entry<String, String>>) parsed.get(0);
+
+		for (Map.Entry<String, String> entry : entries)
+		{
+			out.put(entry.getKey(), entry.getValue());
+		}
+
+		if (out.isEmpty())
+		{
+			return null;
+		}
+
+		return new MediaWikiTemplate(out);
 	}
 
 	@Nullable
 	public static MediaWikiTemplate parseLua(final String data)
 	{
-		final String[] split = data.split("\n");
 		final Map<String, String> out = new HashMap<>();
+		final List<Object> parsed = LUA_PARSER.matchesSkipping(data);
 
-		boolean hasStart = false;
-
-		for (String line : split)
+		if (parsed.isEmpty())
 		{
-			if (line.startsWith("return {"))
-			{
-				hasStart = true;
-				continue;
-			}
-
-			if (!hasStart)
-			{
-				continue;
-			}
-
-			if (line.endsWith("}"))
-			{
-				return new MediaWikiTemplate(out);
-			}
-
-			if (line.endsWith(","))
-			{
-				final String[] kv = line.substring(0, line.length() - 1).split("=");
-
-				if (kv.length != 2)
-				{
-					continue;
-				}
-
-				out.put(kv[0].trim(), kv[1].trim());
-			}
+			return null;
 		}
 
-		return null;
+		final List<Map.Entry<String, String>> entries = (List<Map.Entry<String, String>>) parsed.get(0);
+
+		for (Map.Entry<String, String> entry : entries)
+		{
+			out.put(entry.getKey(), entry.getValue());
+		}
+
+		if (out.isEmpty())
+		{
+			return null;
+		}
+
+		return new MediaWikiTemplate(out);
 	}
 
 	private final Map<String, String> map;
@@ -128,7 +145,8 @@ public class MediaWikiTemplate
 		if (Strings.isNullOrEmpty(val) ||
 			val.equalsIgnoreCase("no") ||
 			val.equalsIgnoreCase("n/a") ||
-		    val.equals("nil"))
+		    val.equals("nil") ||
+		    val.equalsIgnoreCase("varies"))
 		{
 			return "";
 		}

@@ -91,8 +91,8 @@ public class ItemLimitsDumper
 				continue;
 			}
 
-			log.info("Dumping item limit for {} {}", item.id, name);
 			limits.put(name, limit);
+			log.info("Dumped item limit for {} {}", item.id, name);
 		}
 
 		try (FileWriter fw = new FileWriter(new File(out, "item_limits.json")))

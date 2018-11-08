@@ -43,7 +43,8 @@ public class App
 	public static void main(String[] args) throws IOException
 	{
 		final File home = new File(System.getProperty("user.home"));
-		final Store cacheStore = new Store(new File(home, "jagexcache/oldschool/LIVE/"));
+		final Store cacheStore = new Store(new File(home,
+			"jagexcache" + File.separator + "oldschool" + File.separator + "LIVE"));
 		cacheStore.load();
 
 		ItemVariationsDumper.dump(cacheStore);

@@ -29,8 +29,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import lombok.EqualsAndHashCode;
+import lombok.Builder;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.EquipmentInventorySlot;
 import net.runelite.cache.ItemManager;
 import net.runelite.cache.definitions.ItemDefinition;
 import net.runelite.cache.fs.Store;
@@ -42,38 +44,42 @@ import net.runelite.data.dump.MediaWikiTemplate;
 @Slf4j
 public class ItemStatsDumper
 {
-	@EqualsAndHashCode
+    @Value
+	@Builder
 	private static final class ItemEquipmentStats
 	{
-		int astab;
-		int aslash;
-		int acrush;
-		int amagic;
-		int arange;
+		private final int slot;
 
-		int dstab;
-		int dslash;
-		int dcrush;
-		int dmagic;
-		int drange;
+		private final int astab;
+		private final int aslash;
+		private final int acrush;
+		private final int amagic;
+		private final int arange;
 
-		int str;
-		int rstr;
-		int mdmg;
-		int prayer;
-		int aspeed;
+		private final int dstab;
+		private final int dslash;
+		private final int dcrush;
+		private final int dmagic;
+		private final int drange;
+
+		private final int str;
+		private final int rstr;
+		private final int mdmg;
+		private final int prayer;
+		private final int aspeed;
 	}
 
-	@EqualsAndHashCode
+    @Value
+	@Builder
 	private static final class ItemStats
 	{
-		static final ItemStats DEFAULT = new ItemStats();
+		static final ItemStats DEFAULT = ItemStats.builder().build();
 
-		boolean quest;
-		boolean equipable;
-		double weight;
+		private final boolean quest;
+		private final boolean equipable;
+		private final double weight;
 
-		ItemEquipmentStats equipment;
+		private final ItemEquipmentStats equipment;
 	}
 
 	public static void dump(final Store store, final MediaWiki wiki) throws IOException
@@ -119,12 +125,10 @@ public class ItemStatsDumper
 				continue;
 			}
 
-			log.info("Dumping item stat for {} {}", item.id, name);
-
-			final ItemStats itemStat = new ItemStats();
-			itemStat.quest = base.getBoolean("quest");
-			itemStat.equipable = base.getBoolean("equipable");
-			itemStat.weight = base.getDouble("weight");
+			final ItemStats.ItemStatsBuilder itemStat = ItemStats.builder();
+			itemStat.quest(base.getBoolean("quest"));
+			itemStat.equipable(base.getBoolean("equipable"));
+			itemStat.weight(base.getDouble("weight"));
 
 			if (itemStat.equipable)
 			{
@@ -132,29 +136,31 @@ public class ItemStatsDumper
 
 				if (stats != null)
 				{
-					final ItemEquipmentStats equipmentStat = new ItemEquipmentStats();
-					equipmentStat.astab = stats.getInt("astab");
-					equipmentStat.aslash = stats.getInt("aslash");
-					equipmentStat.acrush = stats.getInt("acrush");
-					equipmentStat.amagic = stats.getInt("amagic");
-					equipmentStat.arange = stats.getInt("arange");
+					final ItemEquipmentStats.ItemEquipmentStatsBuilder equipmentStat = ItemEquipmentStats.builder();
+					equipmentStat.slot(toEquipmentSlot(stats.getValue("slot")));
+					equipmentStat.astab(stats.getInt("astab"));
+					equipmentStat.aslash(stats.getInt("aslash"));
+					equipmentStat.acrush(stats.getInt("acrush"));
+					equipmentStat.amagic(stats.getInt("amagic"));
+					equipmentStat.arange(stats.getInt("arange"));
 
-					equipmentStat.dstab = stats.getInt("dstab");
-					equipmentStat.dslash = stats.getInt("dslash");
-					equipmentStat.dcrush = stats.getInt("dcrush");
-					equipmentStat.dmagic = stats.getInt("dmagic");
-					equipmentStat.drange = stats.getInt("drange");
+					equipmentStat.dstab(stats.getInt("dstab"));
+					equipmentStat.dslash(stats.getInt("dslash"));
+					equipmentStat.dcrush(stats.getInt("dcrush"));
+					equipmentStat.dmagic(stats.getInt("dmagic"));
+					equipmentStat.drange(stats.getInt("drange"));
 
-					equipmentStat.str = stats.getInt("str");
-					equipmentStat.rstr = stats.getInt("rstr");
-					equipmentStat.mdmg = stats.getInt("mdmg");
-					equipmentStat.prayer = stats.getInt("prayer");
-					equipmentStat.aspeed = stats.getInt("aspeed");
-					itemStat.equipment = equipmentStat;
+					equipmentStat.str(stats.getInt("str"));
+					equipmentStat.rstr(stats.getInt("rstr"));
+					equipmentStat.mdmg(stats.getInt("mdmg"));
+					equipmentStat.prayer(stats.getInt("prayer"));
+					equipmentStat.aspeed(stats.getInt("aspeed"));
+					itemStat.equipment(equipmentStat.build());
 				}
 			}
 
-			itemStats.put(name, itemStat);
+			itemStats.put(name, itemStat.build());
+			log.info("Dumped item stat for {} {}", item.id, name);
 		}
 
 		itemStats.values().removeIf(ItemStats.DEFAULT::equals);
@@ -165,5 +171,38 @@ public class ItemStatsDumper
 		}
 
 		log.info("Dumped {} item stats", itemStats.size());
+	}
+
+	private static int toEquipmentSlot(final String slotName)
+	{
+		switch (slotName.toLowerCase())
+		{
+			case "weapon":
+			case "2h":
+				// TODO: 2h should return both weapon and shield somehow
+				return EquipmentInventorySlot.WEAPON.getSlotIdx();
+			case "body":
+				return EquipmentInventorySlot.BODY.getSlotIdx();
+			case "head":
+				return EquipmentInventorySlot.HEAD.getSlotIdx();
+			case "ammo":
+				return EquipmentInventorySlot.AMMO.getSlotIdx();
+			case "legs":
+				return EquipmentInventorySlot.LEGS.getSlotIdx();
+			case "feet":
+				return EquipmentInventorySlot.BOOTS.getSlotIdx();
+			case "hands":
+				return EquipmentInventorySlot.GLOVES.getSlotIdx();
+			case "cape":
+				return EquipmentInventorySlot.CAPE.getSlotIdx();
+			case "neck":
+				return EquipmentInventorySlot.AMULET.getSlotIdx();
+			case "ring":
+				return EquipmentInventorySlot.RING.getSlotIdx();
+			case "shield":
+				return EquipmentInventorySlot.SHIELD.getSlotIdx();
+		}
+
+		return -1;
 	}
 }

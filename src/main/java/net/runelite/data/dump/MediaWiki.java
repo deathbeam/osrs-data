@@ -59,6 +59,7 @@ public class MediaWiki
 			.addQueryParameter("action", "parse")
 			.addQueryParameter("format", "json")
 			.addQueryParameter("prop", "wikitext")
+			.addQueryParameter("redirects", "true")
 			.addQueryParameter("page", page.replaceAll(" ", "_"));
 
 		if (section != -1)
