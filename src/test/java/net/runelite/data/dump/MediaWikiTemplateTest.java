@@ -80,6 +80,38 @@ class MediaWikiTemplateTest
 		assertEquals(infoboxBonuses.getInt("aspeed"), 4);
 		assertEquals(infoboxBonuses.getValue("slot"), "2h");
 		assertEquals(infoboxBonuses.getValue("image"), "Dragon claws equipped.png{{!}}130px");
+
+		final String multiItemInfoboxBonusesData =
+			"{{Infobox Bonuses\n" +
+			"|version1 = Uncharged\n" +
+			"|version2 = Charged\n" +
+			"|image_1 = Dragonfire shield (uncharged) equipped.png{{!}}150px\n" +
+			"|image_2 = Dragonfire shield equipped.png{{!}}150px\n" +
+			"|astab = 0\n" +
+			"|aslash = 0\n" +
+			"|acrush = 0\n" +
+			"|amagic = -10\n" +
+			"|arange = -5\n" +
+			"|dstab1 = +20\n" +
+			"|dslash1 = +25\n" +
+			"|dcrush1 = +22\n" +
+			"|dmagic1 = +10\n" +
+			"|drange1 = +22\n" +
+			"|dstab2 = +70\n" +
+			"|dslash2 = +75\n" +
+			"|dcrush2 = +72\n" +
+			"|dmagic2 = +10\n" +
+			"|drange2 = +72\n" +
+			"|str = +7\n" +
+			"|rstr = 0\n" +
+			"|mdmg = 0\n" +
+			"|prayer = 0\n" +
+			"|slot = Shield\n" +
+			"}}";
+
+		final MediaWikiTemplate multiBonuses = MediaWikiTemplate.parseWikitext("Infobox Bonuses", multiItemInfoboxBonusesData);
+		assertNotNull(multiBonuses);
+		assertEquals(multiBonuses.getInt("dstab2"), 70);
 	}
 
 	@Test
