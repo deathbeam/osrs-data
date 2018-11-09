@@ -31,7 +31,8 @@ class MediaWikiTemplateTest
 	@Test
 	void parseWikitext()
 	{
-		final String infoboxItemData = "{{Infobox Item\n" +
+		final String infoboxItemData =
+			"{{Infobox Item\n" +
 			"|name = Dragon claws\n" +
 			"|image = [[File:Dragon claws.png]]\n" +
 			"|release = [[5 January]] [[2017]]\n" +
@@ -54,7 +55,7 @@ class MediaWikiTemplateTest
 		assertNotNull(infoboxItem);
 		assertEquals(infoboxItem.getInt("high"), 123000);
 
-		final String infoboxBonusesData = "blahabdasdladh  sdkshdsk s " +
+		final String infoboxBonusesData =
 			"{{Infobox Bonuses\n" +
 			"|astab = 41\n" +
 			"|aslash = 57\n" +
@@ -70,21 +71,21 @@ class MediaWikiTemplateTest
 			"|rstr = 0\n" +
 			"|mdmg = 0\n" +
 			"|prayer = 0\n" +
-			"|slot = 2h\n" +
-			"|aspeed = 4\n" +
-			"|image = Dragon claws equipped.png{{!}}130px\n" +
 			"|caption = A player wearing dragon claws.\n" +
-			"}}\n";
+			"|aspeed = 4|slot = 2h\n" +
+			"|image = Dragon claws equipped.png{{!}}130px}}\n";
 
 		final MediaWikiTemplate infoboxBonuses = MediaWikiTemplate.parseWikitext("Infobox Bonuses", infoboxBonusesData);
 		assertNotNull(infoboxBonuses);
 		assertEquals(infoboxBonuses.getInt("aspeed"), 4);
+		assertEquals(infoboxBonuses.getValue("slot"), "2h");
+		assertEquals(infoboxBonuses.getValue("image"), "Dragon claws equipped.png{{!}}130px");
 	}
 
 	@Test
 	void parseLua()
 	{
-		final String exchangeInfoData = "blahblabh blabh sadas " +
+		final String exchangeInfoData =
 			"return {\n" +
 			"    itemId     = 13652,\n" +
 			"    price      = 83173735,\n" +

@@ -63,9 +63,17 @@ public class MediaWikiTemplate
 			.seq(CharacterParser.of('}'))
 			.pick(2);
 
+		final Parser wikiValue = CharacterParser.of('|')
+			.or(StringParser.of("}}"))
+			.or(StringParser.of("{{")).neg().plus().trim();
+
+		final Parser wikiExpression = StringParser.of("{{")
+			.seq(StringParser.of("}}").neg().plus().trim())
+			.seq(StringParser.of("}}"));
+
 		final Parser notOrPair = key.trim()
 			.seq(CharacterParser.of('=').trim())
-			.seq(CharacterParser.of('|').or(StringParser.of("\n}}")).neg().plus().flatten().trim())
+			.seq(wikiValue.or(wikiExpression).plus().flatten().trim())
 			.map((Function<List<String>, Map.Entry<String, String>>) input -> new AbstractMap.SimpleEntry<>(input.get(0).trim(), input.get(2).trim()));
 
 		final Parser orLine = CharacterParser.of('|')
@@ -79,11 +87,12 @@ public class MediaWikiTemplate
 	public static MediaWikiTemplate parseWikitext(final String name, final String data)
 	{
 		final Map<String, String> out = new HashMap<>();
-		final List<Object> parsed = StringParser.of("{{")
+		final Parser wikiParser = StringParser.of("{{")
 			.seq(StringParser.of(name).trim())
 			.seq(MEDIAWIKI_PARSER)
-			.pick(2)
-			.matchesSkipping(data);
+			.pick(2);
+
+		final List<Object> parsed = wikiParser.matchesSkipping(data);
 
 		if (parsed.isEmpty())
 		{
