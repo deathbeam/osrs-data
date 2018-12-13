@@ -24,14 +24,11 @@
 package net.runelite.data.dump.wiki;
 
 import com.google.common.base.Strings;
-import com.google.common.primitives.Ints;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import lombok.Builder;
@@ -53,25 +50,25 @@ public class ItemStatsDumper
 	@Builder
 	private static final class ItemEquipmentStats
 	{
-		private final int slot;
+		private final Integer slot;
 
-		private final int astab;
-		private final int aslash;
-		private final int acrush;
-		private final int amagic;
-		private final int arange;
+		private final Integer astab;
+		private final Integer aslash;
+		private final Integer acrush;
+		private final Integer amagic;
+		private final Integer arange;
 
-		private final int dstab;
-		private final int dslash;
-		private final int dcrush;
-		private final int dmagic;
-		private final int drange;
+		private final Integer dstab;
+		private final Integer dslash;
+		private final Integer dcrush;
+		private final Integer dmagic;
+		private final Integer drange;
 
-		private final int str;
-		private final int rstr;
-		private final int mdmg;
-		private final int prayer;
-		private final int aspeed;
+		private final Integer str;
+		private final Integer rstr;
+		private final Integer mdmg;
+		private final Integer prayer;
+		private final Integer aspeed;
 	}
 
     @Value
@@ -80,9 +77,9 @@ public class ItemStatsDumper
 	{
 		static final ItemStats DEFAULT = ItemStats.builder().build();
 
-		private final boolean quest;
-		private final boolean equipable;
-		private final double weight;
+		private final Boolean quest;
+		private final Boolean equipable;
+		private final Double weight;
 
 		private final ItemEquipmentStats equipment;
 	}
@@ -136,7 +133,7 @@ public class ItemStatsDumper
 			itemStat.equipable(base.getBoolean("equipable"));
 			itemStat.weight(base.getDouble("weight"));
 
-			if (itemStat.equipable)
+			if (Boolean.TRUE.equals(itemStat.equipable))
 			{
 				final MediaWikiTemplate stats = MediaWikiTemplate.parseWikitext("Infobox Bonuses", data);
 
@@ -193,18 +190,18 @@ public class ItemStatsDumper
 		log.info("Dumped {} item stats", itemStats.size());
 	}
 
-	private static int getVarInt(final MediaWikiTemplate template, final String key)
+	private static Integer getVarInt(final MediaWikiTemplate template, final String key)
 	{
-        final int var2 = template.getInt(key + "2");
-		final int var1 = template.getInt(key + "1");
-		final int var = template.getInt(key);
+		final Integer var2 = template.getInt(key + "2");
+		final Integer var1 = template.getInt(key + "1");
+		final Integer var = template.getInt(key);
 
-		if (var2 != 0)
+		if (var2 != null)
 		{
 			return var2;
 		}
 
-		if (var1 != 0)
+		if (var1 != null)
 		{
 			return var1;
 		}
@@ -212,8 +209,13 @@ public class ItemStatsDumper
 		return var;
 	}
 
-	private static int toEquipmentSlot(final String slotName)
+	private static Integer toEquipmentSlot(final String slotName)
 	{
+		if (slotName == null)
+		{
+			return null;
+		}
+
 		switch (slotName.toLowerCase())
 		{
 			case "weapon":
@@ -242,6 +244,6 @@ public class ItemStatsDumper
 				return EquipmentInventorySlot.SHIELD.getSlotIdx();
 		}
 
-		return -1;
+		return null;
 	}
 }

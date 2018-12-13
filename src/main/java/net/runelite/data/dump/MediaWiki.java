@@ -69,11 +69,11 @@ public class MediaWiki
 
 		final HttpUrl url = urlBuilder.build();
 
-        final Request request = new Request.Builder()
+		final Request request = new Request.Builder()
 			.url(url)
 			.build();
 
-		try(final Response response = client.newCall(request).execute())
+		try (final Response response = client.newCall(request).execute())
 		{
 			if (response.isSuccessful())
 			{
@@ -83,7 +83,7 @@ public class MediaWiki
 		}
 		catch (IOException | NullPointerException e)
 		{
-            return "";
+			return "";
 		}
 
 		return "";

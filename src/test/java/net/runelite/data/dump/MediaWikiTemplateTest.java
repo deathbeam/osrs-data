@@ -53,7 +53,7 @@ class MediaWikiTemplateTest
 
 		final MediaWikiTemplate infoboxItem = MediaWikiTemplate.parseWikitext("Infobox Item", infoboxItemData);
 		assertNotNull(infoboxItem);
-		assertEquals(infoboxItem.getInt("high"), 123000);
+		assertEquals((int)infoboxItem.getInt("high"), 123000);
 
 		final String infoboxBonusesData =
 			"{{Infobox Bonuses\n" +
@@ -77,7 +77,7 @@ class MediaWikiTemplateTest
 
 		final MediaWikiTemplate infoboxBonuses = MediaWikiTemplate.parseWikitext("Infobox Bonuses", infoboxBonusesData);
 		assertNotNull(infoboxBonuses);
-		assertEquals(infoboxBonuses.getInt("aspeed"), 4);
+		assertEquals((int)infoboxBonuses.getInt("aspeed"), 4);
 		assertEquals(infoboxBonuses.getValue("slot"), "2h");
 		assertEquals(infoboxBonuses.getValue("image"), "Dragon claws equipped.png{{!}}130px");
 
@@ -111,7 +111,7 @@ class MediaWikiTemplateTest
 
 		final MediaWikiTemplate multiBonuses = MediaWikiTemplate.parseWikitext("Infobox Bonuses", multiItemInfoboxBonusesData);
 		assertNotNull(multiBonuses);
-		assertEquals(multiBonuses.getInt("dstab2"), 70);
+		assertEquals((int)multiBonuses.getInt("dstab2"), 70);
 	}
 
 	@Test
@@ -135,6 +135,6 @@ class MediaWikiTemplateTest
 
 		final MediaWikiTemplate exchangeInfo = MediaWikiTemplate.parseLua(exchangeInfoData);
 		assertNotNull(exchangeInfo);
-		assertEquals(exchangeInfo.getInt("value"), -205000);
+		assertEquals((int)exchangeInfo.getInt("value"), -205000);
 	}
 }

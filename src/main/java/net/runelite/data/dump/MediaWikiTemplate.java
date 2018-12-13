@@ -154,59 +154,61 @@ public class MediaWikiTemplate
 		if (Strings.isNullOrEmpty(val) ||
 			val.equalsIgnoreCase("no") ||
 			val.equalsIgnoreCase("n/a") ||
-		    val.equals("nil") ||
-		    val.equalsIgnoreCase("varies"))
+			val.equals("nil") ||
+			val.equalsIgnoreCase("varies"))
 		{
-			return "";
+			return null;
 		}
 
 		val = val.replace("kg", "").replaceAll("[><]", "");
-		return val;
+		return Strings.isNullOrEmpty(val) ? null : val;
 	}
 
-	public boolean getBoolean(final String key)
+	public Boolean getBoolean(final String key)
 	{
 		final String val = getValue(key);
-		return !Strings.isNullOrEmpty(val);
+		return !Strings.isNullOrEmpty(val) ? true : null;
 	}
 
-	public double getDouble(final String key)
-	{
-		final String val = getValue(key);
-
-		if (Strings.isNullOrEmpty(val))
-		{
-			return 0;
-		}
-
-		try
-		{
-			return Double.parseDouble(val);
-		}
-		catch (NumberFormatException e)
-		{
-			e.printStackTrace();
-			return 0;
-		}
-	}
-
-	public int getInt(final String key)
+	public Double getDouble(final String key)
 	{
 		final String val = getValue(key);
 
 		if (Strings.isNullOrEmpty(val))
 		{
-			return 0;
+			return null;
 		}
 
 		try
 		{
-			return Integer.parseInt(val);
+			double v = Double.parseDouble(val);
+			return v != 0 ? v : null;
 		}
 		catch (NumberFormatException e)
 		{
 			e.printStackTrace();
-			return 0;
+			return null;
+		}
+	}
+
+	public Integer getInt(final String key)
+	{
+		final String val = getValue(key);
+
+		if (Strings.isNullOrEmpty(val))
+		{
+			return null;
+		}
+
+		try
+		{
+			int v = Integer.parseInt(val);
+			return v != 0 ? v : null;
+		}
+		catch (NumberFormatException e)
+		{
+			e.printStackTrace();
+			return null;
 		}
 	}
 }
