@@ -46,7 +46,7 @@ import net.runelite.data.dump.MediaWikiTemplate;
 @Slf4j
 public class ItemStatsDumper
 {
-    @Value
+	@Value
 	@Builder
 	private static final class ItemEquipmentStats
 	{
@@ -71,7 +71,7 @@ public class ItemStatsDumper
 		private final Integer aspeed;
 	}
 
-    @Value
+	@Value
 	@Builder
 	private static final class ItemStats
 	{
@@ -94,8 +94,8 @@ public class ItemStatsDumper
 		ItemManager itemManager = new ItemManager(store);
 		itemManager.load();
 
-        final Map<String, ItemStats> itemStats = new LinkedHashMap<>();
-        final Set<String> skipped = new HashSet<>();
+		final Map<String, ItemStats> itemStats = new LinkedHashMap<>();
+		final Set<String> skipped = new HashSet<>();
 
 		for (ItemDefinition item : itemManager.getItems())
 		{
@@ -141,23 +141,23 @@ public class ItemStatsDumper
 				{
 					final ItemEquipmentStats.ItemEquipmentStatsBuilder equipmentStat = ItemEquipmentStats.builder();
 					equipmentStat.slot(toEquipmentSlot(stats.getValue("slot")));
-					equipmentStat.astab(getVarInt(stats,"astab"));
-					equipmentStat.aslash(getVarInt(stats,"aslash"));
-					equipmentStat.acrush(getVarInt(stats,"acrush"));
-					equipmentStat.amagic(getVarInt(stats,"amagic"));
-					equipmentStat.arange(getVarInt(stats,"arange"));
+					equipmentStat.astab(getVarInt(stats, "astab"));
+					equipmentStat.aslash(getVarInt(stats, "aslash"));
+					equipmentStat.acrush(getVarInt(stats, "acrush"));
+					equipmentStat.amagic(getVarInt(stats, "amagic"));
+					equipmentStat.arange(getVarInt(stats, "arange"));
 
-					equipmentStat.dstab(getVarInt(stats,"dstab"));
-					equipmentStat.dslash(getVarInt(stats,"dslash"));
-					equipmentStat.dcrush(getVarInt(stats,"dcrush"));
-					equipmentStat.dmagic(getVarInt(stats,"dmagic"));
-					equipmentStat.drange(getVarInt(stats,"drange"));
+					equipmentStat.dstab(getVarInt(stats, "dstab"));
+					equipmentStat.dslash(getVarInt(stats, "dslash"));
+					equipmentStat.dcrush(getVarInt(stats, "dcrush"));
+					equipmentStat.dmagic(getVarInt(stats, "dmagic"));
+					equipmentStat.drange(getVarInt(stats, "drange"));
 
-					equipmentStat.str(getVarInt(stats,"str"));
-					equipmentStat.rstr(getVarInt(stats,"rstr"));
-					equipmentStat.mdmg(getVarInt(stats,"mdmg"));
-					equipmentStat.prayer(getVarInt(stats,"prayer"));
-					equipmentStat.aspeed(getVarInt(stats,"aspeed"));
+					equipmentStat.str(getVarInt(stats, "str"));
+					equipmentStat.rstr(getVarInt(stats, "rstr"));
+					equipmentStat.mdmg(getVarInt(stats, "mdmg"));
+					equipmentStat.prayer(getVarInt(stats, "prayer"));
+					equipmentStat.aspeed(getVarInt(stats, "aspeed"));
 
 					final ItemEquipmentStats builtEqStat = equipmentStat.build();
 

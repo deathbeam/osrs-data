@@ -23,7 +23,8 @@
  */
 package net.runelite.data.dump;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.Test;
 
 class MediaWikiTemplateTest
@@ -33,85 +34,108 @@ class MediaWikiTemplateTest
 	{
 		final String infoboxItemData =
 			"{{Infobox Item\n" +
-			"|name = Dragon claws\n" +
-			"|image = [[File:Dragon claws.png]]\n" +
-			"|release = [[5 January]] [[2017]]\n" +
-			"|update = Dragon Claws & 3rd Birthday\n" +
-			"|members = Yes\n" +
-			"|quest = No\n" +
-			"|tradeable = Yes\n" +
-			"|equipable = Yes\n" +
-			"|stackable = No\n" +
-			"|high = 123000\n" +
-			"|low = 82000\n" +
-			"|destroy = Drop\n" +
-			"|store = No\n" +
-			"|exchange = gemw\n" +
-			"|examine = A set of fighting claws.\n" +
-			"|weight = 0\n" +
-			"}}\n";
+				"|name = Dragon claws\n" +
+				"|image = [[File:Dragon claws.png]]\n" +
+				"|release = [[5 January]] [[2017]]\n" +
+				"|update = Dragon Claws & 3rd Birthday\n" +
+				"|members = Yes\n" +
+				"|quest = No\n" +
+				"|tradeable = Yes\n" +
+				"|equipable = Yes\n" +
+				"|stackable = No\n" +
+				"|high = 123000\n" +
+				"|low = 82000\n" +
+				"|destroy = Drop\n" +
+				"|store = No\n" +
+				"|exchange = gemw\n" +
+				"|examine = A set of fighting claws.\n" +
+				"|weight = 0\n" +
+				"}}\n";
 
 		final MediaWikiTemplate infoboxItem = MediaWikiTemplate.parseWikitext("Infobox Item", infoboxItemData);
 		assertNotNull(infoboxItem);
-		assertEquals((int)infoboxItem.getInt("high"), 123000);
+		assertEquals((int) infoboxItem.getInt("high"), 123000);
+
+		final String infoboxWrongCaseData =
+			"{{Infobox item\n" +
+				"|name = Magic shortbow (i)\n" +
+				"|image = [[File:Magic shortbow (i).png]]\n" +
+				"|release = [[18 September]] [[2014]]\n" +
+				"|update = Bounty Hunter\n" +
+				"|members = Yes\n" +
+				"|tradeable = No\n" +
+				"|equipable = Yes\n" +
+				"|stackable = No\n" +
+				"|quest = No\n" +
+				"|low = 640\n" +
+				"|high = 960\n" +
+				"|store = No\n" +
+				"|examine = Short and magical, but still effective.\n" +
+				"|weight = 1\n" +
+				"|destroy = Drop\n" +
+				"}}\n";
+
+		final MediaWikiTemplate infoboxWrongCaseItem = MediaWikiTemplate.parseWikitext("Infobox Item", infoboxWrongCaseData);
+		assertNotNull(infoboxWrongCaseItem);
+		assertEquals((int) infoboxWrongCaseItem.getInt("high"), 960);
 
 		final String infoboxBonusesData =
 			"{{Infobox Bonuses\n" +
-			"|astab = 41\n" +
-			"|aslash = 57\n" +
-			"|acrush = -4\n" +
-			"|amagic = 0\n" +
-			"|arange = 0\n" +
-			"|dstab = 13\n" +
-			"|dslash = 26\n" +
-			"|dcrush = 7\n" +
-			"|dmagic = 0\n" +
-			"|drange = 0\n" +
-			"|str = 56\n" +
-			"|rstr = 0\n" +
-			"|mdmg = 0\n" +
-			"|prayer = 0\n" +
-			"|caption = A player wearing dragon claws.\n" +
-			"|aspeed = 4|slot = 2h\n" +
-			"|image = Dragon claws equipped.png{{!}}130px}}\n";
+				"|astab = 41\n" +
+				"|aslash = 57\n" +
+				"|acrush = -4\n" +
+				"|amagic = 0\n" +
+				"|arange = 0\n" +
+				"|dstab = 13\n" +
+				"|dslash = 26\n" +
+				"|dcrush = 7\n" +
+				"|dmagic = 0\n" +
+				"|drange = 0\n" +
+				"|str = 56\n" +
+				"|rstr = 0\n" +
+				"|mdmg = 0\n" +
+				"|prayer = 0\n" +
+				"|caption = A player wearing dragon claws.\n" +
+				"|aspeed = 4|slot = 2h\n" +
+				"|image = Dragon claws equipped.png{{!}}130px}}\n";
 
 		final MediaWikiTemplate infoboxBonuses = MediaWikiTemplate.parseWikitext("Infobox Bonuses", infoboxBonusesData);
 		assertNotNull(infoboxBonuses);
-		assertEquals((int)infoboxBonuses.getInt("aspeed"), 4);
+		assertEquals((int) infoboxBonuses.getInt("aspeed"), 4);
 		assertEquals(infoboxBonuses.getValue("slot"), "2h");
 		assertEquals(infoboxBonuses.getValue("image"), "Dragon claws equipped.png{{!}}130px");
 
 		final String multiItemInfoboxBonusesData =
 			"{{Infobox Bonuses\n" +
-			"|version1 = Uncharged\n" +
-			"|version2 = Charged\n" +
-			"|image_1 = Dragonfire shield (uncharged) equipped.png{{!}}150px\n" +
-			"|image_2 = Dragonfire shield equipped.png{{!}}150px\n" +
-			"|astab = 0\n" +
-			"|aslash = 0\n" +
-			"|acrush = 0\n" +
-			"|amagic = -10\n" +
-			"|arange = -5\n" +
-			"|dstab1 = +20\n" +
-			"|dslash1 = +25\n" +
-			"|dcrush1 = +22\n" +
-			"|dmagic1 = +10\n" +
-			"|drange1 = +22\n" +
-			"|dstab2 = +70\n" +
-			"|dslash2 = +75\n" +
-			"|dcrush2 = +72\n" +
-			"|dmagic2 = +10\n" +
-			"|drange2 = +72\n" +
-			"|str = +7\n" +
-			"|rstr = 0\n" +
-			"|mdmg = 0\n" +
-			"|prayer = 0\n" +
-			"|slot = Shield\n" +
-			"}}";
+				"|version1 = Uncharged\n" +
+				"|version2 = Charged\n" +
+				"|image_1 = Dragonfire shield (uncharged) equipped.png{{!}}150px\n" +
+				"|image_2 = Dragonfire shield equipped.png{{!}}150px\n" +
+				"|astab = 0\n" +
+				"|aslash = 0\n" +
+				"|acrush = 0\n" +
+				"|amagic = -10\n" +
+				"|arange = -5\n" +
+				"|dstab1 = +20\n" +
+				"|dslash1 = +25\n" +
+				"|dcrush1 = +22\n" +
+				"|dmagic1 = +10\n" +
+				"|drange1 = +22\n" +
+				"|dstab2 = +70\n" +
+				"|dslash2 = +75\n" +
+				"|dcrush2 = +72\n" +
+				"|dmagic2 = +10\n" +
+				"|drange2 = +72\n" +
+				"|str = +7\n" +
+				"|rstr = 0\n" +
+				"|mdmg = 0\n" +
+				"|prayer = 0\n" +
+				"|slot = Shield\n" +
+				"}}";
 
 		final MediaWikiTemplate multiBonuses = MediaWikiTemplate.parseWikitext("Infobox Bonuses", multiItemInfoboxBonusesData);
 		assertNotNull(multiBonuses);
-		assertEquals((int)multiBonuses.getInt("dstab2"), 70);
+		assertEquals((int) multiBonuses.getInt("dstab2"), 70);
 	}
 
 	@Test
@@ -119,22 +143,22 @@ class MediaWikiTemplateTest
 	{
 		final String exchangeInfoData =
 			"return {\n" +
-			"    itemId     = 13652,\n" +
-			"    price      = 83173735,\n" +
-			"    last       = 83533604,\n" +
-			"    date       = '12:18, November 08, 2018 (UTC)',\n" +
-			"    lastDate   = '05:43, November 08, 2018 (UTC)',\n" +
-			"    icon       = 'Dragon claws.png',\n" +
-			"    item       = 'Dragon claws',\n" +
-			"    value      = -205000,\n" +
-			"    limit      = nil,\n" +
-			"    members    = true,\n" +
-			"    category   = nil,\n" +
-			"    examine    = 'A set of fighting claws.'\n" +
-			"}\n";
+				"    itemId     = 13652,\n" +
+				"    price      = 83173735,\n" +
+				"    last       = 83533604,\n" +
+				"    date       = '12:18, November 08, 2018 (UTC)',\n" +
+				"    lastDate   = '05:43, November 08, 2018 (UTC)',\n" +
+				"    icon       = 'Dragon claws.png',\n" +
+				"    item       = 'Dragon claws',\n" +
+				"    value      = -205000,\n" +
+				"    limit      = nil,\n" +
+				"    members    = true,\n" +
+				"    category   = nil,\n" +
+				"    examine    = 'A set of fighting claws.'\n" +
+				"}\n";
 
 		final MediaWikiTemplate exchangeInfo = MediaWikiTemplate.parseLua(exchangeInfoData);
 		assertNotNull(exchangeInfo);
-		assertEquals((int)exchangeInfo.getInt("value"), -205000);
+		assertEquals((int) exchangeInfo.getInt("value"), -205000);
 	}
 }

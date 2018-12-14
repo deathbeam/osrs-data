@@ -65,7 +65,8 @@ public class MediaWikiTemplate
 
 		final Parser wikiValue = CharacterParser.of('|')
 			.or(StringParser.of("}}"))
-			.or(StringParser.of("{{")).neg().plus().trim();
+			.or(StringParser.of("{{"))
+			.neg().plus().trim();
 
 		final Parser wikiExpression = StringParser.of("{{")
 			.seq(StringParser.of("}}").neg().star().trim())
@@ -88,7 +89,7 @@ public class MediaWikiTemplate
 	{
 		final Map<String, String> out = new HashMap<>();
 		final Parser wikiParser = StringParser.of("{{")
-			.seq(StringParser.of(name).trim())
+			.seq(StringParser.ofIgnoringCase(name).trim())
 			.seq(MEDIAWIKI_PARSER)
 			.pick(2);
 
