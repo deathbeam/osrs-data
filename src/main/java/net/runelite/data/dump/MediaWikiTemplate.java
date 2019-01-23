@@ -24,16 +24,20 @@
 package net.runelite.data.dump;
 
 import com.google.common.base.Function;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
+import lombok.extern.slf4j.Slf4j;
+import org.petitparser.context.Result;
 import org.petitparser.parser.Parser;
 import org.petitparser.parser.primitive.CharacterParser;
 import org.petitparser.parser.primitive.StringParser;
 
+@Slf4j
 public class MediaWikiTemplate
 {
 	private static final Parser LUA_PARSER;
@@ -66,19 +70,27 @@ public class MediaWikiTemplate
 		final Parser wikiValue = CharacterParser.of('|')
 			.or(StringParser.of("}}"))
 			.or(StringParser.of("{{"))
+			.or(StringParser.of("]]"))
+			.or(StringParser.of("[["))
 			.neg().plus().trim();
 
-		final Parser wikiExpression = StringParser.of("{{")
+		final Parser wikiBraceExpression = StringParser.of("{{")
 			.seq(StringParser.of("}}").neg().star().trim())
 			.seq(StringParser.of("}}"));
 
+		final Parser wikiSquareExpression = StringParser.of("[[")
+			.seq(StringParser.of("]]").neg().star().trim())
+			.seq(StringParser.of("]]"));
+
 		final Parser notOrPair = key.trim()
 			.seq(CharacterParser.of('=').trim())
-			.seq(wikiValue.or(wikiExpression).plus().flatten().trim())
-			.map((Function<List<String>, Map.Entry<String, String>>) input -> new AbstractMap.SimpleEntry<>(input.get(0).trim(), input.get(2).trim()));
+			.seq(CharacterParser.whitespace().star().seq(wikiSquareExpression.or(wikiBraceExpression).or(wikiValue)).plus().flatten().trim().optional())
+			.map((Function<List<String>, Map.Entry<String, String>>) input -> new AbstractMap.SimpleEntry<>(
+				input.get(0).trim(),
+				MoreObjects.firstNonNull(input.get(2), "").trim()));
 
 		final Parser orLine = CharacterParser.of('|')
-			.seq(notOrPair.trim())
+			.seq(notOrPair.trim().optional())
 			.pick(1);
 
 		MEDIAWIKI_PARSER = orLine.plus().trim().seq(StringParser.of("}}")).pick(0);
@@ -97,6 +109,20 @@ public class MediaWikiTemplate
 
 		if (parsed.isEmpty())
 		{
+			final Result parse = StringParser.of("{{")
+				.seq(StringParser.ofIgnoringCase(name).trim())
+				.neg()
+				.star()
+				.seq(wikiParser)
+				.seq(CharacterParser.any().star())
+				.parse(data);
+
+			if (!parse.isSuccess())
+			{
+				log.warn("Failed to parse: {}", data);
+				log.warn("Error message: {}", parse.getMessage());
+			}
+
 			return null;
 		}
 
@@ -104,6 +130,11 @@ public class MediaWikiTemplate
 
 		for (Map.Entry<String, String> entry : entries)
 		{
+			if (entry == null)
+			{
+				continue;
+			}
+
 			out.put(entry.getKey(), entry.getValue());
 		}
 
@@ -123,6 +154,18 @@ public class MediaWikiTemplate
 
 		if (parsed.isEmpty())
 		{
+			final Result parse = StringParser.of("return")
+				.neg()
+				.star()
+				.seq(LUA_PARSER)
+				.seq(CharacterParser.any()).parse(data);
+
+			if (!parse.isSuccess())
+			{
+				log.warn("Failed to parse: {}", data);
+				log.warn("Error message: {}", parse.getMessage());
+			}
+
 			return null;
 		}
 
