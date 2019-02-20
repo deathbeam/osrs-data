@@ -29,7 +29,6 @@ import java.io.File;
 import java.io.IOException;
 import net.runelite.cache.fs.Store;
 import net.runelite.data.dump.MediaWiki;
-import net.runelite.data.dump.cache.ItemVariationsDumper;
 import net.runelite.data.dump.wiki.ItemLimitsDumper;
 import net.runelite.data.dump.wiki.ItemStatsDumper;
 
@@ -49,8 +48,6 @@ public class App
 
 		// Try to make this go faster (probably not very smart)
 		System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "100");
-
-		ItemVariationsDumper.dump(cacheStore);
 
 		final MediaWiki wiki = new MediaWiki("https://oldschool.runescape.wiki");
 		ItemLimitsDumper.dump(cacheStore, wiki);
