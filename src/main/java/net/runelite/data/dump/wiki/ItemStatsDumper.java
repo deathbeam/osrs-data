@@ -28,9 +28,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 import lombok.Builder;
@@ -96,13 +94,17 @@ public class ItemStatsDumper
 		ItemManager itemManager = new ItemManager(store);
 		itemManager.load();
 
-		final Map<String, ItemStats> itemStats = new TreeMap<>();
-		final Set<String> skipped = new HashSet<>();
+		final Map<Integer, ItemStats> itemStats = new TreeMap<>();
 		final Collection<ItemDefinition> items = itemManager.getItems();
 		final Stream<ItemDefinition> itemDefinitionStream = items.parallelStream();
 
 		itemDefinitionStream.forEach(item ->
 		{
+			if (item.getNotedTemplate() != -1)
+			{
+				return;
+			}
+
 			if (item.name.equalsIgnoreCase("NULL"))
 			{
 				return;
@@ -118,7 +120,7 @@ public class ItemStatsDumper
 				return;
 			}
 
-			final String data = wiki.getPageData(name, 0);
+			final String data = wiki.getSpecialLookupData("item", item.id, 0);
 
 			if (Strings.isNullOrEmpty(data))
 			{
@@ -176,14 +178,11 @@ public class ItemStatsDumper
 
 			if (ItemStats.DEFAULT.equals(val))
 			{
-				// Do this so we can skip duplicate item fetching
-				skipped.add(name);
+				return;
 			}
-			else
-			{
-				itemStats.put(name, val);
-				log.info("Dumped item stat for {} {}", item.id, name);
-			}
+
+			itemStats.put(item.id, val);
+			log.info("Dumped item stat for {} {}", item.id, name);
 		});
 
 		try (FileWriter fw = new FileWriter(new File(out, "item_stats.json")))

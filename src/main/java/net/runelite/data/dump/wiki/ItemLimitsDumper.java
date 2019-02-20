@@ -57,6 +57,11 @@ public class ItemLimitsDumper
 
 		itemDefinitionStream.forEach(item ->
 		{
+			if (item.getNotedTemplate() != -1)
+			{
+				return;
+			}
+
 			if (item.name.equalsIgnoreCase("NULL"))
 			{
 				return;

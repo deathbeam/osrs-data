@@ -46,16 +46,52 @@ public class MediaWiki
 	}
 
 	private final OkHttpClient client = new OkHttpClient();
+	private final OkHttpClient clientNoRedirect = client.newBuilder()
+		.followRedirects(false)
+		.followSslRedirects(false)
+		.build();
+
 	private final HttpUrl base;
 
 	public MediaWiki(final String base)
 	{
-		this.base = HttpUrl.parse(base).newBuilder().addPathSegment("api.php").build();
+		this.base = HttpUrl.parse(base);
+	}
+
+	public String getSpecialLookupData(final String type, final int id, final int section)
+	{
+		final HttpUrl url = base.newBuilder()
+			.addPathSegment("w")
+			.addPathSegment("Special:Lookup")
+			.addQueryParameter("type", type)
+			.addQueryParameter("id", String.valueOf(id))
+			.build();
+
+		final Request request = new Request.Builder()
+			.url(url)
+			.build();
+
+		try (final Response response = clientNoRedirect.newCall(request).execute())
+		{
+			if (response.isRedirect())
+			{
+				final String page = response.header("Location")
+					.replace(base.newBuilder().addPathSegment("w").build().toString() + "/", "");
+				return getPageData(page, section);
+			}
+		}
+		catch (IOException | NullPointerException e)
+		{
+			return "";
+		}
+
+		return "";
 	}
 
 	public String getPageData(final String page, int section)
 	{
 		final HttpUrl.Builder urlBuilder = base.newBuilder()
+			.addPathSegment("api.php")
 			.addQueryParameter("action", "parse")
 			.addQueryParameter("format", "json")
 			.addQueryParameter("prop", "wikitext")
