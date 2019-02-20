@@ -46,6 +46,8 @@ import net.runelite.data.dump.MediaWikiTemplate;
 @Slf4j
 public class ItemStatsDumper
 {
+	private final static Integer MAX_ITEMS_ON_PAGE = 50;
+
 	@Value
 	@Builder
 	private static final class ItemEquipmentStats
@@ -134,44 +136,61 @@ public class ItemStatsDumper
 				return;
 			}
 
+			final int nItems = findMaxIndex(base);
 			final ItemStats.ItemStatsBuilder itemStat = ItemStats.builder();
-			itemStat.quest(base.getBoolean("quest"));
-			itemStat.equipable(base.getBoolean("equipable"));
-			itemStat.weight(base.getDouble("weight"));
 
-			if (Boolean.TRUE.equals(itemStat.equipable))
+			for (int index = 1; index <= nItems; index++)
 			{
-				final MediaWikiTemplate stats = MediaWikiTemplate.parseWikitext("Infobox Bonuses", data);
+				final int offset = nItems == 1 ? 0 : index;
+				final String wikiName = getVarString(base, "name", offset);
 
-				if (stats != null)
+				// Skip this index if name or itemId doesn't match with wiki
+				if (nItems > 1 && !wikiName.equalsIgnoreCase(name))
 				{
-					final ItemEquipmentStats.ItemEquipmentStatsBuilder equipmentStat = ItemEquipmentStats.builder();
-					equipmentStat.slot(toEquipmentSlot(stats.getValue("slot")));
-					equipmentStat.astab(getVarInt(stats, "astab"));
-					equipmentStat.aslash(getVarInt(stats, "aslash"));
-					equipmentStat.acrush(getVarInt(stats, "acrush"));
-					equipmentStat.amagic(getVarInt(stats, "amagic"));
-					equipmentStat.arange(getVarInt(stats, "arange"));
+					continue;
+				}
 
-					equipmentStat.dstab(getVarInt(stats, "dstab"));
-					equipmentStat.dslash(getVarInt(stats, "dslash"));
-					equipmentStat.dcrush(getVarInt(stats, "dcrush"));
-					equipmentStat.dmagic(getVarInt(stats, "dmagic"));
-					equipmentStat.drange(getVarInt(stats, "drange"));
+				itemStat.quest(getVarBoolean(base, "quest", offset));
+				itemStat.equipable(getVarBoolean(base, "equipable", offset));
+				itemStat.weight(getVarDouble(base, "weight", offset));
 
-					equipmentStat.str(getVarInt(stats, "str"));
-					equipmentStat.rstr(getVarInt(stats, "rstr"));
-					equipmentStat.mdmg(getVarInt(stats, "mdmg"));
-					equipmentStat.prayer(getVarInt(stats, "prayer"));
-					equipmentStat.aspeed(getVarInt(stats, "aspeed"));
+				if (Boolean.TRUE.equals(itemStat.equipable))
+				{
+					final MediaWikiTemplate stats = MediaWikiTemplate.parseWikitext("Infobox Bonuses", data);
 
-					final ItemEquipmentStats builtEqStat = equipmentStat.build();
-
-					if (!builtEqStat.equals(ItemEquipmentStats.builder().build()))
+					if (stats != null)
 					{
-						itemStat.equipment(builtEqStat);
+						final ItemEquipmentStats.ItemEquipmentStatsBuilder equipmentStat = ItemEquipmentStats.builder();
+
+						equipmentStat.slot(toEquipmentSlot(getVarString(stats, "slot", offset)));
+						equipmentStat.astab(getVarInt(stats, "astab", offset));
+						equipmentStat.aslash(getVarInt(stats, "aslash", offset));
+						equipmentStat.acrush(getVarInt(stats, "acrush", offset));
+						equipmentStat.amagic(getVarInt(stats, "amagic", offset));
+						equipmentStat.arange(getVarInt(stats, "arange", offset));
+
+						equipmentStat.dstab(getVarInt(stats, "dstab", offset));
+						equipmentStat.dslash(getVarInt(stats, "dslash", offset));
+						equipmentStat.dcrush(getVarInt(stats, "dcrush", offset));
+						equipmentStat.dmagic(getVarInt(stats, "dmagic", offset));
+						equipmentStat.drange(getVarInt(stats, "drange", offset));
+
+						equipmentStat.str(getVarInt(stats, "str", offset));
+						equipmentStat.rstr(getVarInt(stats, "rstr", offset));
+						equipmentStat.mdmg(getVarInt(stats, "mdmg", offset));
+						equipmentStat.prayer(getVarInt(stats, "prayer", offset));
+						equipmentStat.aspeed(getVarInt(stats, "aspeed", offset));
+
+						final ItemEquipmentStats builtEqStat = equipmentStat.build();
+
+						if (!builtEqStat.equals(ItemEquipmentStats.builder().build()))
+						{
+							itemStat.equipment(builtEqStat);
+						}
 					}
 				}
+
+				break;
 			}
 
 			final ItemStats val = itemStat.build();
@@ -193,23 +212,92 @@ public class ItemStatsDumper
 		log.info("Dumped {} item stats", itemStats.size());
 	}
 
-	private static Integer getVarInt(final MediaWikiTemplate template, final String key)
+	/**
+	 * Counts how many items are on page
+	 * @param template media wiki template
+	 * @return item count
+	 */
+	private static int findMaxIndex(final MediaWikiTemplate template)
 	{
-		final Integer var2 = template.getInt(key + "2");
-		final Integer var1 = template.getInt(key + "1");
-		final Integer var = template.getInt(key);
+		int nItems = 1;
 
-		if (var2 != null)
+		if (template.getValue("version1") == null)
 		{
-			return var2;
+			return nItems;
 		}
 
-		if (var1 != null)
+		while (nItems < MAX_ITEMS_ON_PAGE)
 		{
-			return var1;
+			if (template.getValue(fixIndex("name", nItems + 1)) != null || template.getValue(fixIndex("version", nItems + 1)) != null)
+			{
+				nItems++;
+			}
+			else
+			{
+				break;
+			}
 		}
 
-		return var;
+		return nItems;
+	}
+
+	/**
+	 * Return fixed string version of indexed key
+	 * @param base key name
+	 * @param index current index
+	 * @return string representation of index
+	 */
+	private static String fixIndex(final String base, final Integer index)
+	{
+		return index == 0 ? base : base + index;
+	}
+
+	private static String getVarString(final MediaWikiTemplate template, final String key, final Integer index)
+	{
+		final String var = template.getValue(fixIndex(key, index));
+
+		if (var != null)
+		{
+			return var;
+		}
+
+		return template.getValue(key);
+	}
+
+	private static Boolean getVarBoolean(final MediaWikiTemplate template, final String key, final Integer index)
+	{
+		final Boolean var = template.getBoolean(fixIndex(key, index));
+
+		if (var != null)
+		{
+			return var;
+		}
+
+		return template.getBoolean(key);
+	}
+
+	private static Integer getVarInt(final MediaWikiTemplate template, final String key, final Integer index)
+	{
+		final Integer var = template.getInt(fixIndex(key, index));
+
+		if (var != null)
+		{
+			return var;
+		}
+
+		return template.getInt(key);
+	}
+
+	private static Double getVarDouble(final MediaWikiTemplate template, final String key, final Integer index)
+	{
+		final Double var = template.getDouble(fixIndex(key, index));
+
+		if (var != null)
+		{
+			return var;
+		}
+
+		return template.getDouble(key);
 	}
 
 	private static Integer toEquipmentSlot(final String slotName)

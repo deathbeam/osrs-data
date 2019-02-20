@@ -184,6 +184,71 @@ class MediaWikiTemplateTest
 	}
 
 	@Test
+	void parseInfoboxItem6()
+	{
+		final String data =
+			"{{Infobox Item\n" +
+				"|version1 = Unpoisoned\n" +
+				"|version2 = Poison\n" +
+				"|version3 = Poison+\n" +
+				"|version4 = Poison++\n" +
+				"|version5 = Karambwan poison\n" +
+				"|name1 = Iron hasta\n" +
+				"|name2 = Iron hasta(p)\n" +
+				"|name3 = Iron hasta(p+)\n" +
+				"|name4 = Iron hasta(p++)\n" +
+				"|name5 = Iron hasta(kp)\n" +
+				"|image1 = [[File:Iron hasta.png]]\n" +
+				"|image2 = [[File:Iron hasta(p).png]]\n" +
+				"|image3 = [[File:Iron hasta(p+).png]]\n" +
+				"|image4 = [[File:Iron hasta(p++).png]]\n" +
+				"|image5 = [[File:Iron hasta(kp).png]]\n" +
+				"|release = [[3 July]] [[2007]]\n" +
+				"|update = Barbarian Training\n" +
+				"|members = Yes\n" +
+				"|quest = No\n" +
+				"|tradeable1 = Yes\n" +
+				"|tradeable2 = Yes\n" +
+				"|tradeable3 = Yes\n" +
+				"|tradeable4 = Yes\n" +
+				"|tradeable5 = No\n" +
+				"|equipable = Yes\n" +
+				"|stackable = No\n" +
+				"|noteable1 = Yes\n" +
+				"|noteable2 = Yes\n" +
+				"|noteable3 = Yes\n" +
+				"|noteable4 = Yes\n" +
+				"|noteable5 = No\n" +
+				"|placeholder = Yes\n" +
+				"|destroy = Drop\n" +
+				"|value = 91\n" +
+				"|store = No\n" +
+				"|exchange1 = gemw\n" +
+				"|exchange2 = gemw\n" +
+				"|exchange3 = gemw\n" +
+				"|exchange4 = gemw\n" +
+				"|weight1 = 2.267\n" +
+				"|weight2 = 2.267\n" +
+				"|weight3 = 2\n" +
+				"|weight4 = 2.267\n" +
+				"|weight5 = 2.267\n" +
+				"|examine1 = An iron-tipped, one-handed hasta.\n" +
+				"|examine2 = A poison-tipped, one-handed iron hasta.\n" +
+				"|examine3 = A poison-tipped, one-handed iron hasta.\n" +
+				"|examine4 = A poison-tipped, one-handed iron hasta.\n" +
+				"|examine5 = A karambwan poison-tipped, one-handed iron hasta.\n" +
+				"|id1 = 11369\n" +
+				"|id2 = 11386\n" +
+				"|id3 = 11389\n" +
+				"|id4 = 11391\n" +
+				"|id5 = 11388\n" +
+				"}}";
+
+		final MediaWikiTemplate template = MediaWikiTemplate.parseWikitext("Infobox Item", data);
+		assertNotNull(template);
+	}
+
+	@Test
 	void parseInfoboxBonuses1()
 	{
 		final String data =
