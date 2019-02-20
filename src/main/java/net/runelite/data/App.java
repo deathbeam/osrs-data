@@ -47,6 +47,9 @@ public class App
 			"jagexcache" + File.separator + "oldschool" + File.separator + "LIVE"));
 		cacheStore.load();
 
+		// Try to make this go faster (probably not very smart)
+		System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "100");
+
 		ItemVariationsDumper.dump(cacheStore);
 
 		final MediaWiki wiki = new MediaWiki("https://oldschool.runescape.wiki");

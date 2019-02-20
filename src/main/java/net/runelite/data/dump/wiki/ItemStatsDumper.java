@@ -27,10 +27,12 @@ import com.google.common.base.Strings;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.stream.Stream;
 import lombok.Builder;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
@@ -94,14 +96,16 @@ public class ItemStatsDumper
 		ItemManager itemManager = new ItemManager(store);
 		itemManager.load();
 
-		final Map<String, ItemStats> itemStats = new LinkedHashMap<>();
+		final Map<String, ItemStats> itemStats = new TreeMap<>();
 		final Set<String> skipped = new HashSet<>();
+		final Collection<ItemDefinition> items = itemManager.getItems();
+		final Stream<ItemDefinition> itemDefinitionStream = items.parallelStream();
 
-		for (ItemDefinition item : itemManager.getItems())
+		itemDefinitionStream.forEach(item ->
 		{
 			if (item.name.equalsIgnoreCase("NULL"))
 			{
-				continue;
+				return;
 			}
 
 			final String name = Namer
@@ -109,23 +113,23 @@ public class ItemStatsDumper
 				.replace('\u00A0', ' ')
 				.trim();
 
-			if (name.isEmpty() || itemStats.containsKey(name) || skipped.contains(name))
+			if (name.isEmpty())
 			{
-				continue;
+				return;
 			}
 
 			final String data = wiki.getPageData(name, 0);
 
 			if (Strings.isNullOrEmpty(data))
 			{
-				continue;
+				return;
 			}
 
 			final MediaWikiTemplate base = MediaWikiTemplate.parseWikitext("Infobox Item", data);
 
 			if (base == null)
 			{
-				continue;
+				return;
 			}
 
 			final ItemStats.ItemStatsBuilder itemStat = ItemStats.builder();
@@ -180,7 +184,7 @@ public class ItemStatsDumper
 				itemStats.put(name, val);
 				log.info("Dumped item stat for {} {}", item.id, name);
 			}
-		}
+		});
 
 		try (FileWriter fw = new FileWriter(new File(out, "item_stats.json")))
 		{

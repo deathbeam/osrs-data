@@ -20,7 +20,7 @@
 	<name>runelite-data</name>
 
 	<properties>
-		<latest>1.4.26-SNAPSHOT</latest>
+		<latest>1.5.13-SNAPSHOT</latest>
 	</properties>
 
 	<repositories>

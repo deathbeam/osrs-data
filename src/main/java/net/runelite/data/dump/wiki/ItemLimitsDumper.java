@@ -27,8 +27,9 @@ import com.google.common.base.Strings;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.cache.ItemManager;
 import net.runelite.cache.definitions.ItemDefinition;
@@ -51,13 +52,14 @@ public class ItemLimitsDumper
 		ItemManager itemManager = new ItemManager(store);
 		itemManager.load();
 
-		final Map<String, Integer> limits = new LinkedHashMap<>();
+		final Map<String, Integer> limits = new TreeMap<>();
+		final Stream<ItemDefinition> itemDefinitionStream = itemManager.getItems().parallelStream();
 
-		for (ItemDefinition item : itemManager.getItems())
+		itemDefinitionStream.forEach(item ->
 		{
 			if (item.name.equalsIgnoreCase("NULL"))
 			{
-				continue;
+				return;
 			}
 
 			final String name = Namer
@@ -67,33 +69,33 @@ public class ItemLimitsDumper
 
 			if (name.isEmpty() || limits.containsKey(name))
 			{
-				continue;
+				return;
 			}
 
 			final String data = wiki.getPageData("Module:Exchange/" + name, -1);
 
 			if (Strings.isNullOrEmpty(data))
 			{
-				continue;
+				return;
 			}
 
 			final MediaWikiTemplate geStats = MediaWikiTemplate.parseLua(data);
 
 			if (geStats == null)
 			{
-				continue;
+				return;
 			}
 
 			final int limit = geStats.getInt("limit");
 
 			if (limit <= 0)
 			{
-				continue;
+				return;
 			}
 
 			limits.put(name, limit);
 			log.info("Dumped item limit for {} {}", item.id, name);
-		}
+		});
 
 		try (FileWriter fw = new FileWriter(new File(out, "item_limits.json")))
 		{
