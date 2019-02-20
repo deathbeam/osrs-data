@@ -80,7 +80,7 @@ public class MediaWiki
 				return getPageData(page, section);
 			}
 		}
-		catch (IOException | NullPointerException e)
+		catch (Exception e)
 		{
 			return "";
 		}
@@ -117,7 +117,7 @@ public class MediaWiki
 				return App.GSON.fromJson(new InputStreamReader(in), WikiResponse.class).parse.wikitext.get("*");
 			}
 		}
-		catch (IOException | NullPointerException e)
+		catch (Exception e)
 		{
 			return "";
 		}

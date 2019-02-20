@@ -91,7 +91,7 @@ public class ItemStatsDumper
 
 		log.info("Dumping item stats to {}", out);
 
-		ItemManager itemManager = new ItemManager(store);
+		final ItemManager itemManager = new ItemManager(store);
 		itemManager.load();
 
 		final Map<Integer, ItemStats> itemStats = new TreeMap<>();

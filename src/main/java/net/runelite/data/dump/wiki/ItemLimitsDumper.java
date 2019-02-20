@@ -27,6 +27,7 @@ import com.google.common.base.Strings;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Stream;
@@ -49,11 +50,12 @@ public class ItemLimitsDumper
 
 		log.info("Dumping item limits to {}", out);
 
-		ItemManager itemManager = new ItemManager(store);
+		final ItemManager itemManager = new ItemManager(store);
 		itemManager.load();
 
-		final Map<String, Integer> limits = new TreeMap<>();
-		final Stream<ItemDefinition> itemDefinitionStream = itemManager.getItems().parallelStream();
+		final Map<Integer, Integer> limits = new TreeMap<>();
+		final Collection<ItemDefinition> items = itemManager.getItems();
+		final Stream<ItemDefinition> itemDefinitionStream = items.parallelStream();
 
 		itemDefinitionStream.forEach(item ->
 		{
@@ -72,7 +74,7 @@ public class ItemLimitsDumper
 				.replace('\u00A0', ' ')
 				.trim();
 
-			if (name.isEmpty() || limits.containsKey(name))
+			if (name.isEmpty())
 			{
 				return;
 			}
@@ -98,7 +100,7 @@ public class ItemLimitsDumper
 				return;
 			}
 
-			limits.put(name, limit);
+			limits.put(item.id, limit);
 			log.info("Dumped item limit for {} {}", item.id, name);
 		});
 
