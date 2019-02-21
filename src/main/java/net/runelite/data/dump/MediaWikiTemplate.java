@@ -99,6 +99,12 @@ public class MediaWikiTemplate
 	@Nullable
 	public static MediaWikiTemplate parseWikitext(final String name, final String data)
 	{
+		// Early exit
+		if (!data.toLowerCase().contains(name.toLowerCase()))
+		{
+			return null;
+		}
+
 		final Map<String, String> out = new HashMap<>();
 		final Parser wikiParser = StringParser.of("{{")
 			.seq(StringParser.ofIgnoringCase(name).trim())
