@@ -24,6 +24,7 @@
 package net.runelite.data.dump;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Map;
@@ -32,6 +33,8 @@ import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 public class MediaWiki
 {
@@ -88,8 +91,19 @@ public class MediaWiki
 		return "";
 	}
 
-	public String getPageData(final String page, int section)
+	public String getPageData(String page, int section)
 	{
+		// decode html encoded page name
+		// ex: Mage%27s book -> Mage's_book
+		try
+		{
+			page = URLDecoder.decode(page, StandardCharsets.UTF_8.name());
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			// do nothing, keep page the same
+		}
+
 		final HttpUrl.Builder urlBuilder = base.newBuilder()
 			.addPathSegment("api.php")
 			.addQueryParameter("action", "parse")
