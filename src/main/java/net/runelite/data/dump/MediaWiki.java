@@ -95,9 +95,12 @@ public class MediaWiki
 	{
 		// decode html encoded page name
 		// ex: Mage%27s book -> Mage's_book
-		try {
+		try
+		{
 			page = URLDecoder.decode(page, StandardCharsets.UTF_8.name());
-		} catch (UnsupportedEncodingException e) {
+		}
+		catch (UnsupportedEncodingException e)
+		{
 			// do nothing, keep page the same
 		}
 
