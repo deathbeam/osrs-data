@@ -421,4 +421,23 @@ class MediaWikiTemplateTest
 		assertNotNull(exchangeInfo);
 		assertEquals((int) exchangeInfo.getInt("value"), -205000);
 	}
+
+	@Test
+	void parseKeysWithSpaces()
+	{
+		final String data =
+			"{{Infobox Monster\n" +
+				"|name = Aberrant spectre\n" +
+				"|combat = 96\n" +
+				"|attack speed = 4\n" +
+				"|foo attack style= Magic\n" +
+				"|id = 2,3,4,5,6,7\n" +
+				"}}";
+
+		final MediaWikiTemplate template = MediaWikiTemplate.parseWikitext("Infobox Monster", data);
+		assertNotNull(template);
+		assertEquals(template.getInt("combat"), 96);
+		assertEquals(template.getInt("attack speed"), 4);
+		assertEquals(template.getValue("foo attack style"), "Magic");
+	}
 }

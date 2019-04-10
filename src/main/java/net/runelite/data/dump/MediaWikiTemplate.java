@@ -49,7 +49,7 @@ public class MediaWikiTemplate
 		final Parser doubleString = CharacterParser.of('"').seq(CharacterParser.of('"').neg().plus().flatten()).seq(CharacterParser.of('"'));
 		final Parser string = singleString.or(doubleString).pick(1);
 
-		final Parser key = CharacterParser.letter().or(CharacterParser.of('-')).or(CharacterParser.of('_')).or(CharacterParser.digit()).plus().flatten();
+		final Parser key = CharacterParser.letter().or(CharacterParser.of('-')).or(CharacterParser.of('_')).or(CharacterParser.of(' ')).or(CharacterParser.digit()).plus().flatten();
 		final Parser value = string.or(key);
 
 		final Parser pair = key.trim()
