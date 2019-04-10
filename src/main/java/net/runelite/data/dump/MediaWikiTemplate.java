@@ -266,4 +266,9 @@ public class MediaWikiTemplate
 			return null;
 		}
 	}
+
+	public boolean containsKey(final String key)
+	{
+		return map.containsKey(key);
+	}
 }

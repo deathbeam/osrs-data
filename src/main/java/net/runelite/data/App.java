@@ -31,6 +31,7 @@ import net.runelite.cache.fs.Store;
 import net.runelite.data.dump.MediaWiki;
 import net.runelite.data.dump.wiki.ItemLimitsDumper;
 import net.runelite.data.dump.wiki.ItemStatsDumper;
+import net.runelite.data.dump.wiki.NpcStatsDumper;
 
 public class App
 {
@@ -52,5 +53,6 @@ public class App
 		final MediaWiki wiki = new MediaWiki("https://oldschool.runescape.wiki");
 		ItemLimitsDumper.dump(cacheStore, wiki);
 		ItemStatsDumper.dump(cacheStore, wiki);
+		NpcStatsDumper.dump(cacheStore, wiki);
 	}
 }
