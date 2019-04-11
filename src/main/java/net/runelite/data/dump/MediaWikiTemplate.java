@@ -30,6 +30,8 @@ import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
 import org.petitparser.context.Result;
@@ -99,8 +101,11 @@ public class MediaWikiTemplate
 	@Nullable
 	public static MediaWikiTemplate parseWikitext(final String name, final String data)
 	{
+		final Pattern exactNameTest = Pattern.compile("\\{\\{\\s*" + name + "\\s*\\|", Pattern.CASE_INSENSITIVE);
+		final Matcher m = exactNameTest.matcher(data.toLowerCase());
+
 		// Early exit
-		if (!data.toLowerCase().contains(name.toLowerCase()))
+		if (!m.find())
 		{
 			return null;
 		}
