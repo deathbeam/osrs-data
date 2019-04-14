@@ -24,6 +24,7 @@
 package net.runelite.data.dump.wiki;
 
 import com.google.common.base.Strings;
+import com.google.gson.GsonBuilder;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -248,6 +249,11 @@ public class NpcStatsDumper
 		try (FileWriter fw = new FileWriter(new File(out, "npc_stats.json")))
 		{
 			fw.write(App.GSON.toJson(sorted));
+		}
+
+		try (FileWriter fw = new FileWriter(new File(out, "npc_stats.min.json")))
+		{
+			fw.write(new GsonBuilder().disableHtmlEscaping().create().toJson(sorted));
 		}
 
 		log.info("Dumped {} npc stats", sorted.size());
