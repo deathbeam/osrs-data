@@ -58,8 +58,10 @@ public class NpcStatsDumper
 	{
 		private String name;
 		private final Integer hitpoints;
+		private final Integer hitpoints1;
 		private final Integer combatLevel;
 		private final Integer slayerLevel;
+		private final Integer attackSpeed;
 
 		private final Integer attackLevel;
 		private final Integer strengthLevel;
@@ -287,8 +289,13 @@ public class NpcStatsDumper
 		final NpcStats.NpcStatsBuilder stats = NpcStats.builder();
 
 		stats.hitpoints(getInt("hitpoints", variantKey, template));
+		if (stats.hitpoints == null)
+		{
+			stats.hitpoints(getInt("hitpoints1", variantKey, template));
+		}
 		stats.combatLevel(getInt("combat", variantKey, template));
 		stats.slayerLevel(getInt("slaylvl", variantKey, template));
+		stats.attackSpeed(getInt("attack speed", variantKey, template));
 
 		stats.attackLevel(getInt("att", variantKey, template));
 		stats.strengthLevel(getInt("str", variantKey, template));
