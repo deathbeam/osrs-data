@@ -25,6 +25,7 @@ package net.runelite.data.dump;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.Test;
 
 class MediaWikiTemplateTest
@@ -420,5 +421,53 @@ class MediaWikiTemplateTest
 		final MediaWikiTemplate exchangeInfo = MediaWikiTemplate.parseLua(exchangeInfoData);
 		assertNotNull(exchangeInfo);
 		assertEquals((int) exchangeInfo.getInt("value"), -205000);
+	}
+
+	@Test
+	void parseKeysWithSpaces()
+	{
+		final String data =
+			"{{Infobox Monster\n" +
+				"|name = Aberrant spectre\n" +
+				"|combat = 96\n" +
+				"|attack speed = 4\n" +
+				"|foo attack style= Magic\n" +
+				"|id = 2,3,4,5,6,7\n" +
+				"}}";
+
+		final MediaWikiTemplate template = MediaWikiTemplate.parseWikitext("Infobox Monster", data);
+		assertNotNull(template);
+		assertEquals(template.getInt("combat"), 96);
+		assertEquals(template.getInt("attack speed"), 4);
+		assertEquals(template.getValue("foo attack style"), "Magic");
+	}
+
+	@Test
+	void parseWikitextExactName()
+	{
+		final String data =
+			"{{ Infobox Monster/sandbox \n" +
+				"|version1 = Lv 51\n" +
+				"|version2 = Lv 76\n" +
+				"|name = Brawler\n" +
+				"|combat1 = 51\n" +
+				"|combat2 = 76\n" +
+				"|hitpoints1 = 53\n" +
+				"|hitpoints2 = 83\n" +
+				"|max hit1 = 7\n" +
+				"|max hit2 = 9\n" +
+				"|slaylvl = No\n" +
+				"|slayxp = No\n" +
+				"|att1 = <!--Level 51 stats-->\n" +
+				"|att2 = <!--Level 76 stats-->\n" +
+				"|id1 = 1734\n" +
+				"|id2 = 1735\n" +
+				"}}";
+
+		final MediaWikiTemplate template = MediaWikiTemplate.parseWikitext("Infobox Monster/sandbox", data);
+		assertNotNull(template);
+
+		final MediaWikiTemplate template2 = MediaWikiTemplate.parseWikitext("Infobox Monster", data);
+		assertNull(template2);
 	}
 }

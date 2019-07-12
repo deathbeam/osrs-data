@@ -30,6 +30,8 @@ import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
 import org.petitparser.context.Result;
@@ -49,7 +51,7 @@ public class MediaWikiTemplate
 		final Parser doubleString = CharacterParser.of('"').seq(CharacterParser.of('"').neg().plus().flatten()).seq(CharacterParser.of('"'));
 		final Parser string = singleString.or(doubleString).pick(1);
 
-		final Parser key = CharacterParser.letter().or(CharacterParser.of('-')).or(CharacterParser.of('_')).or(CharacterParser.digit()).plus().flatten();
+		final Parser key = CharacterParser.letter().or(CharacterParser.of('-')).or(CharacterParser.of('_')).or(CharacterParser.of(' ')).or(CharacterParser.digit()).plus().flatten();
 		final Parser value = string.or(key);
 
 		final Parser pair = key.trim()
@@ -99,8 +101,11 @@ public class MediaWikiTemplate
 	@Nullable
 	public static MediaWikiTemplate parseWikitext(final String name, final String data)
 	{
+		final Pattern exactNameTest = Pattern.compile("\\{\\{\\s*" + name + "\\s*\\|", Pattern.CASE_INSENSITIVE);
+		final Matcher m = exactNameTest.matcher(data.toLowerCase());
+
 		// Early exit
-		if (!data.toLowerCase().contains(name.toLowerCase()))
+		if (!m.find())
 		{
 			return null;
 		}
@@ -260,5 +265,10 @@ public class MediaWikiTemplate
 			e.printStackTrace();
 			return null;
 		}
+	}
+
+	public boolean containsKey(final String key)
+	{
+		return map.containsKey(key);
 	}
 }
