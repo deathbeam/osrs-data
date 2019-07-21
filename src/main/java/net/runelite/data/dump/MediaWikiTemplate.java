@@ -67,7 +67,6 @@ public class MediaWikiTemplate
 		LUA_PARSER = StringParser.of("return").trim()
 			.seq(CharacterParser.of('{').trim())
 			.seq(commaLine.plus().trim())
-			.seq(CharacterParser.of('}'))
 			.pick(2);
 
 		final Parser wikiValue = CharacterParser.of('|')
